@@ -1,50 +1,27 @@
-// サムネイルを取得する関数（Open Graphを利用）
-async function fetchThumbnail(url) {
-  try {
-    const response = await fetch(`https://api.linkpreview.net/?key=YOUR_API_KEY&q=${url}`);
-    const data = await response.json();
-    return data.image; // サムネイル画像URLを返す
-  } catch (error) {
-    console.error("Error fetching thumbnail:", error);
-    return null;
-  }
+// URLをリンクに変換する関数
+function convertToLink(content) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return content.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
 }
 
 // 既存の投稿を表示する関数
-async function displayPosts() {
+function displayPosts() {
   const postsDiv = document.getElementById('posts');
   postsDiv.innerHTML = '';
 
   // localStorageから投稿データを取得
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
 
-  for (const post of posts) {
+  posts.forEach((post) => {
     const postDiv = document.createElement('div');
     const postContent = document.createElement('p');
 
-    // 投稿内容にURLが含まれているか確認
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    let contentWithLinks = post.content.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
-    postContent.innerHTML = `${post.timestamp}: ${contentWithLinks}`;
-
+    // 投稿内容にURLが含まれているか確認し、リンクに変換
+    postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
     postDiv.appendChild(postContent);
 
-    // URLからサムネイルを取得して表示
-    const urlMatch = post.content.match(urlRegex);
-    if (urlMatch) {
-      const thumbnailUrl = await fetchThumbnail(urlMatch[0]);
-      if (thumbnailUrl) {
-        const thumbnailImg = document.createElement('img');
-        thumbnailImg.src = thumbnailUrl;
-        thumbnailImg.alt = "Thumbnail";
-        thumbnailImg.style.width = '150px';
-        thumbnailImg.style.height = 'auto';
-        postDiv.appendChild(thumbnailImg);
-      }
-    }
-
     postsDiv.appendChild(postDiv);
-  }
+  });
 }
 
 // フォーム送信時にデータを保存
