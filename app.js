@@ -13,16 +13,80 @@ function displayPosts() {
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
   posts.reverse(); // 最新の投稿が先頭に来るように逆順に
 
-  posts.forEach((post) => {
+  posts.forEach((post, index) => {
     const postDiv = document.createElement('div');
-    const postContent = document.createElement('p');
+    postDiv.classList.add('post');
 
-    // 投稿内容にURLが含まれているか確認し、リンクに変換
-    postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
-    postDiv.appendChild(postContent);
+    // 編集モードかどうかのチェック
+    if (post.editing) {
+      // 編集モードの場合
+      const editInput = document.createElement('textarea');
+      editInput.value = post.content;
+      postDiv.appendChild(editInput);
+
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Save';
+      saveButton.addEventListener('click', () => saveEdit(index, editInput.value));
+      postDiv.appendChild(saveButton);
+
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Cancel';
+      cancelButton.addEventListener('click', () => cancelEdit(index));
+      postDiv.appendChild(cancelButton);
+    } else {
+      // 通常表示の場合
+      const postContent = document.createElement('p');
+      postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
+      postDiv.appendChild(postContent);
+
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Edit';
+      editButton.addEventListener('click', () => enableEdit(index));
+      postDiv.appendChild(editButton);
+
+      // 削除ボタンを追加
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deletePost(index));
+      postDiv.appendChild(deleteButton);
+    }
 
     postsDiv.appendChild(postDiv);
   });
+}
+
+// 編集モードを有効にする関数
+function enableEdit(index) {
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts[index].editing = true;
+  localStorage.setItem('posts', JSON.stringify(posts));
+  displayPosts();
+}
+
+// 編集を保存する関数
+function saveEdit(index, newContent) {
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts[index].content = newContent;
+  posts[index].editing = false;
+  posts[index].timestamp = new Date().toLocaleString(); // 更新日時を設定
+  localStorage.setItem('posts', JSON.stringify(posts));
+  displayPosts();
+}
+
+// 編集をキャンセルする関数
+function cancelEdit(index) {
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts[index].editing = false;
+  localStorage.setItem('posts', JSON.stringify(posts));
+  displayPosts();
+}
+
+// 投稿を削除する関数
+function deletePost(index) {
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts.splice(index, 1); // 指定の投稿を削除
+  localStorage.setItem('posts', JSON.stringify(posts));
+  displayPosts();
 }
 
 // フォーム送信時にデータを保存
@@ -32,7 +96,7 @@ document.getElementById('postForm').addEventListener('submit', (e) => {
   const timestamp = new Date().toLocaleString();
 
   // 新しい投稿データ
-  const newPost = { content, timestamp };
+  const newPost = { content, timestamp, editing: false };
 
   // 既存の投稿データを取得して新しい投稿を追加
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
