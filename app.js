@@ -1,32 +1,38 @@
-document.getElementById('postForm').addEventListener('submit', async (e) => {
+// 既存の投稿を表示する関数
+function displayPosts() {
+  const postsDiv = document.getElementById('posts');
+  postsDiv.innerHTML = '';
+
+  // localStorageから投稿データを取得
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+  posts.forEach((post) => {
+    const postDiv = document.createElement('div');
+    postDiv.textContent = `${post.timestamp}: ${post.content}`;
+    postsDiv.appendChild(postDiv);
+  });
+}
+
+// フォーム送信時にデータを保存
+document.getElementById('postForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const content = document.getElementById('content').value;
-  const date = new Date().toISOString();
+  const timestamp = new Date().toLocaleString();
 
-  const data = `${date},${content}\n`;
+  // 新しい投稿データ
+  const newPost = { content, timestamp };
 
-  try {
-    const response = await fetch('/.netlify/functions/append-post', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `token YOUR_GITHUB_TOKEN`
-      },
-      body: JSON.stringify({
-        content: Buffer.from(data).toString('base64'),
-        message: `New post on ${date}`,
-        path: 'data/posts.csv'
-      })
-    });
+  // 既存の投稿データを取得して新しい投稿を追加
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts.push(newPost);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  // 更新された投稿データをlocalStorageに保存
+  localStorage.setItem('posts', JSON.stringify(posts));
 
-    alert('Post added successfully!');
-    document.getElementById('content').value = ''; // Clear the form
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Failed to submit post');
-  }
+  // フォームをクリアして投稿を再表示
+  document.getElementById('content').value = '';
+  displayPosts();
 });
+
+// 初回ロード時に投稿を表示
+displayPosts();
