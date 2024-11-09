@@ -11,9 +11,8 @@ function displayPosts() {
 
   // localStorageから投稿データを取得し、逆順にする
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
-  posts.reverse(); // 最新の投稿が先頭に来るように逆順に
 
-  posts.forEach((post, index) => {
+  posts.slice().reverse().forEach((post, index) => {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
 
@@ -26,12 +25,12 @@ function displayPosts() {
 
       const saveButton = document.createElement('button');
       saveButton.textContent = 'Save';
-      saveButton.addEventListener('click', () => saveEdit(index, editInput.value));
+      saveButton.addEventListener('click', () => saveEdit(posts.length - 1 - index, editInput.value));
       postDiv.appendChild(saveButton);
 
       const cancelButton = document.createElement('button');
       cancelButton.textContent = 'Cancel';
-      cancelButton.addEventListener('click', () => cancelEdit(index));
+      cancelButton.addEventListener('click', () => cancelEdit(posts.length - 1 - index));
       postDiv.appendChild(cancelButton);
     } else {
       // 通常表示の場合
@@ -41,13 +40,13 @@ function displayPosts() {
 
       const editButton = document.createElement('button');
       editButton.textContent = 'Edit';
-      editButton.addEventListener('click', () => enableEdit(index));
+      editButton.addEventListener('click', () => enableEdit(posts.length - 1 - index));
       postDiv.appendChild(editButton);
 
       // 削除ボタンを追加
       const deleteButton = document.createElement('button');
       deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', () => deletePost(index));
+      deleteButton.addEventListener('click', () => deletePost(posts.length - 1 - index));
       postDiv.appendChild(deleteButton);
     }
 
@@ -108,7 +107,7 @@ document.getElementById('postForm').addEventListener('submit', (e) => {
   // フォームをクリアして投稿を再表示
   document.getElementById('content').value = '';
   displayPosts();
-});
+}
 
 // 初回ロード時に投稿を表示
 displayPosts();
