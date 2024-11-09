@@ -11,6 +11,7 @@ function displayPosts() {
 
   // localStorageから投稿データを取得し、逆順にする
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  console.log("Retrieved posts from localStorage:", posts);
 
   posts.slice().reverse().forEach((post, index) => {
     const postDiv = document.createElement('div');
@@ -18,7 +19,7 @@ function displayPosts() {
 
     // 編集モードかどうかのチェック
     if (post.editing) {
-      // 編集モードの場合
+      postDiv.style.backgroundColor = '#f0f8ff'; // 編集モード時の背景色
       const editInput = document.createElement('textarea');
       editInput.value = post.content;
       postDiv.appendChild(editInput);
@@ -103,11 +104,12 @@ document.getElementById('postForm').addEventListener('submit', (e) => {
 
   // 更新された投稿データをlocalStorageに保存
   localStorage.setItem('posts', JSON.stringify(posts));
+  console.log("Saved posts to localStorage:", posts);
 
   // フォームをクリアして投稿を再表示
   document.getElementById('content').value = '';
   displayPosts();
-}
+});
 
 // 初回ロード時に投稿を表示
 displayPosts();
