@@ -4,13 +4,14 @@ function convertToLink(content) {
   return content.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
 }
 
-// 既存の投稿を表示する関数
+// 既存の投稿を表示する関数（新しい投稿が上に来るように逆順で表示）
 function displayPosts() {
   const postsDiv = document.getElementById('posts');
   postsDiv.innerHTML = '';
 
-  // localStorageから投稿データを取得
+  // localStorageから投稿データを取得し、逆順にする
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts.reverse(); // 最新の投稿が先頭に来るように逆順に
 
   posts.forEach((post) => {
     const postDiv = document.createElement('div');
