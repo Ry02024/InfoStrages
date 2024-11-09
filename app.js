@@ -16,9 +16,9 @@ function displayPosts() {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
 
-    // 編集モードかどうかのチェック
+    // 編集モードの場合は背景色を変更
     if (post.editing) {
-      // 編集モードの場合
+      postDiv.style.backgroundColor = '#f0f8ff'; // 編集モード時の背景色
       const editInput = document.createElement('textarea');
       editInput.value = post.content;
       postDiv.appendChild(editInput);
