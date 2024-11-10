@@ -12,13 +12,13 @@ function displayPosts() {
     postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
     postDiv.appendChild(postContent);
 
+    // 三点リーダーメニューを作成
     const menuButton = document.createElement('button');
     menuButton.textContent = '⋮';
     menuButton.classList.add('menu-button');
 
     const menuContainer = document.createElement('div');
     menuContainer.classList.add('menu-container');
-    menuContainer.style.display = 'none';
 
     const editOption = document.createElement('button');
     editOption.textContent = 'Edit';
@@ -30,7 +30,8 @@ function displayPosts() {
     deleteOption.addEventListener('click', () => deletePost(posts.length - 1 - index));
     menuContainer.appendChild(deleteOption);
 
-    menuButton.addEventListener('click', () => {
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation(); // 他のクリックイベントが伝播しないように
       menuContainer.style.display = menuContainer.style.display === 'none' ? 'block' : 'none';
     });
 
@@ -42,7 +43,6 @@ function displayPosts() {
 
     postDiv.appendChild(menuButton);
     postDiv.appendChild(menuContainer);
-
     postsDiv.appendChild(postDiv);
   });
 }
