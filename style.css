@@ -4,7 +4,13 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
+  background-color: #dff0d8; /* 薄緑色の背景 */
+  color: #000000; /* 黒文字 */
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 5px; /* 角を少し丸める */
 }
+
 
 .menu-button {
   font-size: 18px;
