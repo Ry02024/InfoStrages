@@ -1,71 +1,74 @@
+// 既存の投稿を表示する関数
 function displayPosts() {
   const postsDiv = document.getElementById('posts');
   postsDiv.innerHTML = '';
 
   const posts = JSON.parse(localStorage.getItem('posts')) || [];
-  console.log("Retrieved posts from localStorage:", posts);
-
   posts.slice().reverse().forEach((post, index) => {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
 
-    if (post.editing) {
-      postDiv.style.backgroundColor = '#f0f8ff';
-      const editInput = document.createElement('textarea');
-      editInput.value = post.content;
-      postDiv.appendChild(editInput);
+    const postContent = document.createElement('p');
+    postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
+    postDiv.appendChild(postContent);
 
-      const saveButton = document.createElement('button');
-      saveButton.textContent = 'Save';
-      saveButton.addEventListener('click', () => saveEdit(posts.length - 1 - index, editInput.value));
-      postDiv.appendChild(saveButton);
+    const menuButton = document.createElement('button');
+    menuButton.textContent = '⋮';
+    menuButton.classList.add('menu-button');
 
-      const cancelButton = document.createElement('button');
-      cancelButton.textContent = 'Cancel';
-      cancelButton.addEventListener('click', () => cancelEdit(posts.length - 1 - index));
-      postDiv.appendChild(cancelButton);
-    } else {
-      const postContent = document.createElement('p');
-      postContent.innerHTML = `${post.timestamp}: ${convertToLink(post.content)}`;
-      postDiv.appendChild(postContent);
+    const menuContainer = document.createElement('div');
+    menuContainer.classList.add('menu-container');
+    menuContainer.style.display = 'none';
 
-      // Create ellipsis menu
-      const menuButton = document.createElement('button');
-      menuButton.textContent = '⋮';
-      menuButton.classList.add('menu-button');
+    const editOption = document.createElement('button');
+    editOption.textContent = 'Edit';
+    editOption.addEventListener('click', () => enableEdit(posts.length - 1 - index));
+    menuContainer.appendChild(editOption);
 
-      // Dropdown menu container
-      const menuContainer = document.createElement('div');
-      menuContainer.classList.add('menu-container');
-      menuContainer.style.display = 'none';
+    const deleteOption = document.createElement('button');
+    deleteOption.textContent = 'Delete';
+    deleteOption.addEventListener('click', () => deletePost(posts.length - 1 - index));
+    menuContainer.appendChild(deleteOption);
 
-      // Edit and Delete options in the menu
-      const editOption = document.createElement('button');
-      editOption.textContent = 'Edit';
-      editOption.addEventListener('click', () => enableEdit(posts.length - 1 - index));
-      menuContainer.appendChild(editOption);
+    menuButton.addEventListener('click', () => {
+      menuContainer.style.display = menuContainer.style.display === 'none' ? 'block' : 'none';
+    });
 
-      const deleteOption = document.createElement('button');
-      deleteOption.textContent = 'Delete';
-      deleteOption.addEventListener('click', () => deletePost(posts.length - 1 - index));
-      menuContainer.appendChild(deleteOption);
+    document.addEventListener('click', (e) => {
+      if (!postDiv.contains(e.target)) {
+        menuContainer.style.display = 'none';
+      }
+    });
 
-      // Toggle dropdown menu on button click
-      menuButton.addEventListener('click', () => {
-        menuContainer.style.display = menuContainer.style.display === 'none' ? 'block' : 'none';
-      });
-
-      // Hide menu when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!postDiv.contains(e.target)) {
-          menuContainer.style.display = 'none';
-        }
-      });
-
-      postDiv.appendChild(menuButton);
-      postDiv.appendChild(menuContainer);
-    }
+    postDiv.appendChild(menuButton);
+    postDiv.appendChild(menuContainer);
 
     postsDiv.appendChild(postDiv);
   });
 }
+
+// URLをリンクに変換する関数
+function convertToLink(content) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return content.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
+}
+
+// フォーム送信時の処理
+document.getElementById('postForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const content = document.getElementById('content').value;
+  const timestamp = new Date().toLocaleString();
+
+  const newPost = { content, timestamp, editing: false };
+
+  const posts = JSON.parse(localStorage.getItem('posts')) || [];
+  posts.push(newPost);
+
+  localStorage.setItem('posts', JSON.stringify(posts));
+
+  document.getElementById('content').value = '';
+  displayPosts();
+});
+
+// 初回ロード時に投稿を表示
+displayPosts();
